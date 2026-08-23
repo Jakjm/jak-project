@@ -110,8 +110,13 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wredundant-decls \
         -Wshadow \
         -Wsign-promo \
-        -fdiagnostics-color=always \
-        -mavx")
+        -fdiagnostics-color=always")
+    string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" OG_PROCESSOR_LOWER)
+    if(OG_PROCESSOR_LOWER MATCHES "^(arm64|aarch64)$")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+    else()
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
+    endif()
 
     # additional c++ flags for release mode for our projects
     if(CMAKE_BUILD_TYPE MATCHES "Release")

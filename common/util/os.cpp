@@ -5,6 +5,11 @@
 #include "common/common_types.h"
 #include "common/log/log.h"
 #include "common/util/string_util.h"
+#ifdef __aarch64__ 
+  #ifdef linux
+#include <sys/auxv.h>
+  #endif
+#endif
 
 #ifdef __APPLE__
 #include <stdio.h>
@@ -126,9 +131,9 @@ void setup_cpu_info_linux(CpuInfo& info) {
   }
 #if defined(__aarch64__)
   info.brand = "ARM";
-#ifdef HWCAP_ASIMD
-  info.has_neon = getauxval(AT_HWCAP) & HWCAP_ASIMD;
-#endif
+  #ifdef linux
+    info.has_neon = (getauxval(AT_HWCAP) & HWCAP_ASIMD);
+  #endif
 #endif
 
 #if defined(__x86_64__)
@@ -168,9 +173,11 @@ void setup_cpu_info_macos(CpuInfo& info) {
   info.brand = "Apple";
   char buf[128];
   size_t len = sizeof(buf);
+  #ifdef APPLE
   if (sysctlbyname("hw.model", buf, &len, nullptr, 0) == 0) {
     info.model = buf;
   }
+  #endif
   info.has_neon = true;
 #endif
 }

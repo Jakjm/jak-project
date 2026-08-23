@@ -197,10 +197,13 @@ int main(int argc, char** argv) {
       return -1;
     }
 #else
-    lg::info("Your CPU does not support AVX, which is required for OpenGOAL.");
-    dialogs::create_error_message_dialog(
-        "Unmet Requirements", "Your CPU does not support AVX, which is required for OpenGOAL.");
-    return -1;
+    if (!get_cpu_info().has_neon)
+    {
+      lg::info("Your CPU does not support AVX, which is required for OpenGOAL.");
+      dialogs::create_error_message_dialog(
+          "Unmet Requirements", "Your CPU does not support AVX, which is required for OpenGOAL.");
+      return -1;
+    }
 #endif
   }
 

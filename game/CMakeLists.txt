@@ -11,13 +11,13 @@ endif()
 
 if(ARM64_ARCH)
     # Add your ARM64-specific configuration or build options here
-    set(OG_ASM_FUNCS_FILE kernel/asm_funcs_arm64.s)
     enable_language(ASM)
     set(CMAKE_ASM_SOURCE_FILE_EXTENSIONS ${CMAKE_ASM_SOURCE_FILE_EXTENSIONS} s)
-    # pass -arch only to Apple Clang
-    if(APPLE)
+    if (APPLE)
+        set(OG_ASM_FUNCS_FILE kernel/asm_funcs_macos_arm64.s)
         set_source_files_properties(${OG_ASM_FUNCS_FILE} PROPERTIES COMPILE_FLAGS "-arch arm64 -g")
     else()
+        set(OG_ASM_FUNCS_FILE kernel/asm_funcs_linux_arm64.s)
         set_source_files_properties(${OG_ASM_FUNCS_FILE} PROPERTIES COMPILE_FLAGS "-g")
     endif()
 else()
