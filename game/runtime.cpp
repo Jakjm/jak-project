@@ -161,6 +161,8 @@ void ee_runner(SystemThreadInterface& iface) {
 #ifdef __APPLE__
                   // has no map_populate
                   MAP_ANONYMOUS | MAP_32BIT | MAP_PRIVATE, 0, 0);
+#elif defined(__aarch64__)
+                  MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
 #else
                   MAP_ANONYMOUS | MAP_32BIT | MAP_PRIVATE | MAP_POPULATE, 0, 0);
 #endif
