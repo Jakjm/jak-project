@@ -23,8 +23,8 @@ class FileAttributes {
   };
 
   u32 type;
-  u32 num_chunks;
-  std::vector<LocAndSize> where;
+  u32 num_chunks; //Number of chunks in the file
+  std::vector<LocAndSize> where; //Vector containing start and sizes of chunks in file.
   void Read(BinaryReader& data);
 };
 

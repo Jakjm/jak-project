@@ -18,6 +18,7 @@ namespace snd {
 
 enum chunk : u32 { bank, samples, midi };
 
+//Used to create a u32 representing the four character code of an audio file's type.
 inline static constexpr u32 fourcc(std::string_view p) {
   return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
 }
@@ -417,13 +418,15 @@ BankHandle Loader::BankLoad(std::span<u8> bank) {
     return nullptr;
   }
 
+  
   reader.set_seek(fa.where[0].offset);
+  //Read four character code representing the type of file from first chunk.
   u32 fourcc = reader.read<u32>();
   std::span<u8> bank_data(std::span<u8>(bank).subspan(fa.where[0].offset, fa.where[0].size));
   std::span<u8> sample_data(std::span<u8>(bank).subspan(fa.where[1].offset, fa.where[1].size));
 
-  if (fourcc == snd::fourcc("SBv2")) {
-    if (fa.num_chunks != 3) {
+  if (fourcc == snd::fourcc("SBv2")) { //SBv2 means this is a .MUS file. 
+    if (fa.num_chunks != 3) { //Must have a 3rd chunk for midi data
       fmt::print("SBv2 without midi data not supported\n");
       return 0;
     }

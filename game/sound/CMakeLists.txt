@@ -17,7 +17,7 @@ set(SOUND_SOURCES
   sndshim.cpp
   sdshim.cpp
   )
-
+set_source_files_properties(${SOUND_SOURCES} PROPERTIES COMPILE_FLAGS -O0)
 add_library(sound STATIC ${SOUND_SOURCES})
 target_link_libraries(sound PRIVATE fmt cubeb common)
 

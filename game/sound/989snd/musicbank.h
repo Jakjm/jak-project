@@ -82,5 +82,8 @@ class MusicBank : public SoundBank {
                                                            SndPlayParams& params,
                                                            s32 tick,
                                                            u32 owner) override;
+
+  void DebugPrintAllSounds() override;
+  std::optional<std::string_view> GetName() override;
 };
 }  // namespace snd

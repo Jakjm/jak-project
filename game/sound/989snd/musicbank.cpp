@@ -49,5 +49,11 @@ std::optional<std::unique_ptr<SoundHandler>> MusicBank::MakeHandler(VoiceManager
                                                                     u32 owner) {
   return std::nullopt;
 }
+void MusicBank::DebugPrintAllSounds(){
+  fmt::print("MUS Track ID: {}\n", GetName().value());
+}
+std::optional<std::string_view> MusicBank::GetName(){
+  return std::string_view(reinterpret_cast<const char*>(&BankID), sizeof(BankID));
+}
 
 }  // namespace snd
