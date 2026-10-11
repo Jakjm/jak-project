@@ -211,14 +211,23 @@ bool detach_and_resume(const ThreadID& tid) {
  * Get all registers now. Must be attached and stopped
  */
 bool get_regs_now(const ThreadID& tid, Regs* out) {
-  struct user_regs_struct regs = {};
-  if (ptrace(PTRACE_GETREGSET, tid.id, nullptr, &regs) < 0) {
+  user_regs_struct regs = {};
+  if (ptrace(PTRACE_GETREGSET, tid.id,
+#if defined(__aarch64__)
+             reinterpret_cast<void*>(NT_PRSTATUS),
+#else // Assuming x86_64
+             nullptr,
+#endif
+             &regs) < 0) {
     printf("[Debugger] Failed to PTRACE_GETREGSET %s\n", strerror(errno));
     return false;
   }
-  
-  #if defined(__aarch64__)
-  #else
+
+#if defined(__aarch64__)
+  for (int i = 0; i < 16; ++i)
+    out->gprs[i] = regs.regs[i];
+  out->rip = regs.pc;
+#else // Assuming x86_64
   out->gprs[0] = regs.rax;
   out->gprs[1] = regs.rcx;
   out->gprs[2] = regs.rdx;
@@ -236,7 +245,7 @@ bool get_regs_now(const ThreadID& tid, Regs* out) {
   out->gprs[14] = regs.r14;
   out->gprs[15] = regs.r15;
   out->rip = regs.rip;
-  #endif
+#endif
 
   // todo, get fprs.
   return true;
@@ -247,51 +256,48 @@ bool get_regs_now(const ThreadID& tid, Regs* out) {
  */
 bool set_regs_now(const ThreadID& tid, const Regs& out) {
   struct user_regs_struct regs = {};
-  if (ptrace(PTRACE_GETREGSET, tid.id, nullptr, &regs) < 0) {
+  if (ptrace(PTRACE_GETREGSET, tid.id,
+#if defined(__aarch64__)
+             reinterpret_cast<void*>(NT_PRSTATUS),
+#else // Assuming x86_64
+             nullptr,
+#endif
+             &regs) < 0) {
     printf("[Debugger] Failed to PTRACE_GETREGSET %s\n", strerror(errno));
     return false;
   }
 
-  #if defined(__aarch64__)
-    // regs.sp = out.gprs[4];
-    // regs.rax = out.gprs[0];
-    // regs.rcx = out.gprs[1];
-    // regs.rdx = out.gprs[2];
-    // regs.rbx = out.gprs[3];
-    // regs.rsp = out.gprs[4];
-    // regs.rbp = out.gprs[5];
-    // regs.rsi = out.gprs[6];
-    // regs.rdi = out.gprs[7];
-    // regs.r8 = out.gprs[8];
-    // regs.r9 = out.gprs[9];
-    // regs.r10 = out.gprs[10];
-    // regs.r11 = out.gprs[11];
-    // regs.r12 = out.gprs[12];
-    // regs.r13 = out.gprs[13];
-    // regs.r14 = out.gprs[14];
-    // regs.r15 = out.gprs[15];
-    // regs.pc = out.rip;
-  #else
-    regs.rax = out.gprs[0];
-    regs.rcx = out.gprs[1];
-    regs.rdx = out.gprs[2];
-    regs.rbx = out.gprs[3];
-    regs.rsp = out.gprs[4];
-    regs.rbp = out.gprs[5];
-    regs.rsi = out.gprs[6];
-    regs.rdi = out.gprs[7];
-    regs.r8 = out.gprs[8];
-    regs.r9 = out.gprs[9];
-    regs.r10 = out.gprs[10];
-    regs.r11 = out.gprs[11];
-    regs.r12 = out.gprs[12];
-    regs.r13 = out.gprs[13];
-    regs.r14 = out.gprs[14];
-    regs.r15 = out.gprs[15];
-    regs.rip = out.rip;
-  #endif
+#if defined(__aarch64__)
+  for (int i = 0; i < 16; ++i)
+    regs.regs[i] = out.gprs[i];
+  regs.pc = out.rip;
+#else
+  regs.rax = out.gprs[0];
+  regs.rcx = out.gprs[1];
+  regs.rdx = out.gprs[2];
+  regs.rbx = out.gprs[3];
+  regs.rsp = out.gprs[4];
+  regs.rbp = out.gprs[5];
+  regs.rsi = out.gprs[6];
+  regs.rdi = out.gprs[7];
+  regs.r8 = out.gprs[8];
+  regs.r9 = out.gprs[9];
+  regs.r10 = out.gprs[10];
+  regs.r11 = out.gprs[11];
+  regs.r12 = out.gprs[12];
+  regs.r13 = out.gprs[13];
+  regs.r14 = out.gprs[14];
+  regs.r15 = out.gprs[15];
+  regs.rip = out.rip;
+#endif
 
-  if (ptrace(PTRACE_SETREGSET, tid.id, nullptr, &regs) < 0) {
+  if (ptrace(PTRACE_SETREGSET, tid.id,
+#if defined(__aarch64__)
+             reinterpret_cast<void*>(NT_PRSTATUS),
+#else // Assuming x86_64
+             nullptr,
+#endif
+             &regs) < 0) {
     printf("[Debugger] Failed to PTRACE_SETREGSET %s\n", strerror(errno));
     return false;
   }
